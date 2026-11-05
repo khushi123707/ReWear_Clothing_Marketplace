@@ -1,0 +1,12 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../api";
+import { useAuth } from "../context/AuthContext";
+const categories=["Women's Wear","Men's Wear","Dresses","Tops","Jeans","Accessories","Footwear","Others"];
+export default function AddClothes(){
+ const {user}=useAuth(); const navigate=useNavigate(); const [form,setForm]=useState({title:"",description:"",category:"Women's Wear",size:"M",condition:"Very Good",image:""}); const [error,setError]=useState("");
+ const change=e=>setForm({...form,[e.target.name]:e.target.value});
+ const submit=async e=>{e.preventDefault();try{await api.post("/clothes",form);navigate("/profile");}catch(e){setError(e.response?.data?.message||"Could not add item.");}};
+ if(!user)return <main className="page-shell empty-state"><h1>List your clothes</h1><p>Please login to add a listing.</p><Link className="btn btn-dark" to="/login">Login</Link></main>;
+ return <main className="page-shell form-page"><div className="page-heading"><p className="eyebrow">Give it another life</p><h1>List a piece to swap</h1><p>Add a few details so the community can find it.</p></div><form className="listing-form" onSubmit={submit}><label>Clothing title</label><input name="title" value={form.title} onChange={change} placeholder="e.g. Olive green denim jacket" required/><label>Description</label><textarea name="description" value={form.description} onChange={change} rows="4" placeholder="Tell us about the item..."/><div className="form-two"><div><label>Category</label><select name="category" value={form.category} onChange={change}>{categories.map(x=><option key={x}>{x}</option>)}</select></div><div><label>Size</label><select name="size" value={form.size} onChange={change}>{["XS","S","M","L","XL","XXL","One Size","7","8","9"].map(x=><option key={x}>{x}</option>)}</select></div></div><label>Condition</label><select name="condition" value={form.condition} onChange={change}>{["Like New","Very Good","Good","Gently Used"].map(x=><option key={x}>{x}</option>)}</select><label>Image URL</label><input name="image" type="url" value={form.image} onChange={change} placeholder="https://..." required/><small className="muted">Use a public image URL. Image upload can be added as a future enhancement.</small>{error&&<p className="error-text">{error}</p>}<button className="btn btn-dark">Publish Listing →</button></form></main>
+}
